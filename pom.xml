@@ -41,10 +41,14 @@
             <artifactId>selenium-server</artifactId>
             <version>4.0.0-alpha-2</version>
         </dependency>
+        <dependency>
+            <groupId>com.cedarsoftware</groupId>
+            <artifactId>java-util</artifactId>
+            <version>1.8.0</version>
+        </dependency>
 
 
     </dependencies>
-
 
 
 </project>
