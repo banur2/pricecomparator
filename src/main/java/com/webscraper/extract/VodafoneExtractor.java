@@ -1,27 +1,55 @@
 package com.webscraper.extract;
 
+import com.google.common.base.Function;
 import com.webscraper.bo.MobilePlan;
+import com.webscraper.bo.Provider;
 import com.webscraper.bo.ProviderPlan;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+
 
 public class VodafoneExtractor implements ProviderScrapInterface {
+    private WebDriver webdriver = null;
     private HashMap<MobilePlan, ArrayList<ProviderPlan>> planList = new HashMap<MobilePlan, ArrayList<ProviderPlan>>();
     @Override
     public String setup() throws InterruptedException {
         String url = "https://www.vodafone.co.uk/mobile/phones/pay-monthly-contracts/apple/iphone-xr";
 
-        WebDriver webdriver = new ChromeDriver();
+
         webdriver.get(url);
-        Thread.sleep(5000);
+        //Thread.sleep(10000);
+        Wait<WebDriver> wait = new WebDriverWait(webdriver, 30);
+        wait.until(new Function<WebDriver, Boolean>() {
+            public Boolean apply(WebDriver driver) {
+                System.out.println("Current Window State       : "
+                        + String.valueOf(((JavascriptExecutor) driver).executeScript("return document.readyState")));
+                return String
+                        .valueOf(((JavascriptExecutor) driver).executeScript("return document.readyState"))
+                        .equals("complete");
+            }
+        });
+
+        //need to adjust the waiting time...
+        Thread.sleep(2000);
+        //optanon-popup-bg
+        webdriver.findElement(By.xpath("//button[contains(.,'Accept all cookies')]")).click();
+        Thread.sleep(2000);
         webdriver.findElement(By.xpath("//button[contains(.,'Continue to plans')]")).click();
         Thread.sleep(2000);
 
@@ -60,24 +88,60 @@ public class VodafoneExtractor implements ProviderScrapInterface {
             MobilePlan plan = new MobilePlan();
             String planStr = e.text();
             String[] planStrParsed = planStr.split(" ");
-          //  System.out.println((planStrParsed));
+            List<String> al = new ArrayList<String>();
+            al = Arrays.asList(planStrParsed);
+            System.out.println((al));
+            ProviderPlan providerPlan = new ProviderPlan();
+
+            for(String s: al){
+                if (s.contains("Data"))
+                {
+                    plan.setDataInGB(Integer.parseInt(s.replace("Data", "").replace("GB", "").replace("Unlimited", "-1")));
+                }
+                else if (s.contains("Texts"))
+                {
+                    int limit = Integer.parseInt(s.replace("Unlimited", "-1").replace("Texts", ""));
+                    plan.setDataInGB(limit);
+                    plan.setMinutes(limit);
+                }
+                else if(s.contains("Monthly"))
+                {
+
+                    providerPlan.setMonthlyPayment(Integer.parseInt(s.replace("Monthly", "").replace("£", "")));
+
+                }
+                ArrayList<ProviderPlan> planArrayList = new ArrayList<ProviderPlan>();
+                planArrayList.add(providerPlan);
+                /*
+                Now it stores all mobile plan and provider cost plan not cumulative.. need to write code to check and do composite..
+                Can you give me some good ideas - Banu
+                my idea for a mobile there can be multiple vendor plans
+
+                 */
+                planList.put(plan, planArrayList);
+
+            }
             System.out.println("============" + e.text() + "====================");
         }
 
-        return null;
+        return planList;
 
     }
 
     @Override
     public HashMap<MobilePlan, ArrayList<ProviderPlan>> parse(){
-         return null;
+         return planList;
     }
 
     public static void main(String[] arg) throws InterruptedException{
+        WebDriverManager.chromedriver().setup();
+
         VodafoneExtractor extractor = new VodafoneExtractor();
+        extractor.webdriver = new ChromeDriver();
 
         extractor.extract(extractor.setup());
 
+        System.out.println("Provider List " + extractor.planList);
 
 
     }
