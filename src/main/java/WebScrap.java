@@ -23,7 +23,7 @@ public class WebScrap {
         webdriver.get(url);
         Thread.sleep(5000);
         webdriver.findElement(By.xpath("//button[contains(.,'Continue to plans')]")).click();
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         Document doc = Jsoup.parse(webdriver.getPageSource());
 
@@ -40,8 +40,8 @@ public class WebScrap {
             System.out.println("============" + e.text() + "====================");
         }
         Thread.sleep(5000);
-        webdriver.close();
-        webdriver.quit();
+//        webdriver.close();
+//        webdriver.quit();
     }
 
     public static void site1() throws InterruptedException
@@ -56,7 +56,7 @@ public class WebScrap {
 //        Thread.sleep(2000);
 
         Document doc = Jsoup.parse(webdriver.getPageSource());
-        System.out.println(webdriver.getPageSource());
+
 
        // Document doc = Jsoup.connect(url).get();
         doc.select("p.strikethrough").remove();
@@ -80,9 +80,9 @@ public class WebScrap {
     }
     public static void main(String[] args) throws InterruptedException {
         WebDriverManager.chromedriver().setup();
-      site1();
-        Thread.sleep(5000);
         site2();
+        Thread.sleep(5000);
+        site1();
 
 
 

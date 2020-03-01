@@ -9,6 +9,6 @@ import java.util.HashMap;
 public interface ProviderScrapInterface {
 
     String setup() throws InterruptedException;
-    void extract(String htmlSource);
+    HashMap<MobilePlan, ArrayList<ProviderPlan>> extract(String htmlSource);
     HashMap<MobilePlan, ArrayList<ProviderPlan>> parse();
 }
