@@ -1,6 +1,7 @@
 package com.webscraper.extract;
 
 import com.webscraper.bo.MobilePlan;
+import com.webscraper.bo.Provider;
 import com.webscraper.bo.ProviderPlan;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.jsoup.Jsoup;
@@ -11,23 +12,24 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
-public class SkyExtractor implements ProviderScrapInterface {
-    private HashMap<MobilePlan, ArrayList<ProviderPlan>> planList = new HashMap<MobilePlan, ArrayList<ProviderPlan>>();
-    @Override
-    public String setup() throws InterruptedException {
-        String url = "https://www.sky.com/shop/mobile/phones/apple/apple-iphone-xr?callsandtexts=14210&data=14997&handset=15068&swap=36MSWAP24";
-        WebDriver webdriver = new ChromeDriver();
-        webdriver.get(url);
-        Thread.sleep(5000);
+public class SkyExtractor extends BaseExtractor {
 
-        return webdriver.getPageSource();
-
+    public SkyExtractor(String providerName){
+        super(providerName);
     }
 
     @Override
-    public HashMap<MobilePlan, ArrayList<ProviderPlan>> extract(String htmlSource) {
+    public String setup() throws InterruptedException {
+        super.setURL("https://www.sky.com/shop/mobile/phones/apple/apple-iphone-xr?callsandtexts=14210&data=14997&handset=15068&swap=36MSWAP24");
+        return super.setup();
+    }
+
+    @Override
+    public boolean extract(String htmlSource) {
 
         Document doc = Jsoup.parse(htmlSource);
 
@@ -37,7 +39,11 @@ public class SkyExtractor implements ProviderScrapInterface {
         //.tariff-table-prices p
 
         Elements masthead = doc.select("div.c-product-header");
+        if(masthead.size() == 0)
+            return false;
 
+        Provider provider = new Provider();
+        provider.setName("Sky Mobile");
 
         for(Element e: masthead) {
             //System.out.println(e.html());
@@ -48,27 +54,43 @@ public class SkyExtractor implements ProviderScrapInterface {
 ============15GB Unlimited Calls and Texts £18.00 per month====================
 ============25GB Unlimited Calls and Texts £25.00 per month====================
  */
+            MobilePlan plan = new MobilePlan();
+            plan.setMobileModel("iPhone XR 64 GB");
+            String planStr = e.text();
+            String[] planStrParsed = planStr.split(" ");
+            List<String> al = new ArrayList<String>();
+            al = Arrays.asList(planStrParsed);
+            System.out.println((al));
+            ProviderPlan providerPlan = new ProviderPlan();
+            providerPlan.setProvider(provider);
+
+            if(al.get(0).equals("SIM"))
+                continue;
+            plan.setDataInGB(Integer.parseInt((al.get(0).replace("GB", "")).replace("Unlimited", "-1")));
+            plan.setTextCount(Integer.parseInt(al.get(1).replace("Unlimited", "-1")));
+            plan.setMinutes(Integer.parseInt(al.get(1).replace("Unlimited", "-1")));
+
+            providerPlan.setMonthlyPayment(Float.parseFloat(al.get(5).replace("£", "")));
+            addProviderPlan(plan,providerPlan);
+
 
             System.out.println("============" + e.text()  + "====================");
         }
 
-        return null;
+        return true;
     }
 
-    @Override
-    public HashMap<MobilePlan, ArrayList<ProviderPlan>> parse(){
-         return planList;
-    }
+
 
     public static void main(String[] arg) throws InterruptedException{
         WebDriverManager.chromedriver().setup();
 
-        SkyExtractor extractor = new SkyExtractor();
+        SkyExtractor extractor = new SkyExtractor("Sky Mobile");
 
 
         extractor.extract(extractor.setup());
 
-        System.out.println("Provider List " + extractor.planList);
+        System.out.println("Provider List " + extractor.getProviderPlanList());
 
 
     }

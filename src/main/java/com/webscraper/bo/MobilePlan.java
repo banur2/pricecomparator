@@ -49,4 +49,23 @@ public class MobilePlan {
     public void setDataInGB(int dataInGB) {
         this.dataInGB = dataInGB;
     }
+
+    @Override
+    public String toString() {
+        return "Data " + (( this.getDataInGB()==-1) ?"Unlimited":this.getDataInGB() + "") + " GB";
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj == null) return false;
+        MobilePlan mp = (MobilePlan) obj;
+        return this.hashCode() == mp.hashCode();
+    }
+
+    @Override
+    public int hashCode(){
+        //Hashcode generation based on field attributes value
+        return 2*getMinutes() + 3*getDataInGB() + 4*getTextCount() + 10;
+    }
 }
+

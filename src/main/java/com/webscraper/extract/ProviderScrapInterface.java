@@ -8,7 +8,8 @@ import java.util.HashMap;
 
 public interface ProviderScrapInterface {
 
+    String getProviderName();
     String setup() throws InterruptedException;
-    HashMap<MobilePlan, ArrayList<ProviderPlan>> extract(String htmlSource);
-    HashMap<MobilePlan, ArrayList<ProviderPlan>> parse();
+    boolean extract(String htmlSource);
+    HashMap<MobilePlan, ArrayList<ProviderPlan>> getProviderPlanList();
 }

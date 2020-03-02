@@ -32,4 +32,9 @@ public class ProviderPlan {
     public void setUpfrontCost(float upfrontCost) {
         this.upfrontCost = upfrontCost;
     }
+
+    @Override
+    public String toString() {
+        return this.getProvider().getName() + " £" + monthlyPayment ;
+    }
 }
