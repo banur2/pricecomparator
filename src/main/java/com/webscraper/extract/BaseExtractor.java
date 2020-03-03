@@ -10,6 +10,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,9 +19,12 @@ public abstract class BaseExtractor implements ProviderScrapInterface {
     private String URL;
     private String providerName;
 
-    private HashMap<MobilePlan, ArrayList<ProviderPlan>> planList = new HashMap<MobilePlan, ArrayList<ProviderPlan>>();
+    private HashMap<MobilePlan, ArrayList<ProviderPlan>> planList = new HashMap<>();
 
 
+    /** Send provider Name as part of construction
+     *  @param providerName
+     */
     public BaseExtractor(String providerName){
         this.providerName = providerName;
     }
@@ -38,6 +42,10 @@ public abstract class BaseExtractor implements ProviderScrapInterface {
         this.URL = URL;
     }
 
+    /**
+     * Get Page via Selenium - better behavior than get HTML via URL
+     * Overwritten if any clicks or UI action needed
+     */
     @Override
     public String setup() throws InterruptedException {
 
@@ -60,8 +68,12 @@ public abstract class BaseExtractor implements ProviderScrapInterface {
         return planList;
     }
 
+    /**
+     * Check javascript state of the HTML and wait
+     * @param webdriver
+     */
     protected void waitforPageToLoad(WebDriver webdriver){
-        Wait<WebDriver> wait = new WebDriverWait(webdriver, 30);
+        Wait<WebDriver> wait = new WebDriverWait(webdriver, Duration.ofSeconds(30));
         wait.until(new Function<WebDriver, Boolean>() {
             public Boolean apply(WebDriver driver) {
                 System.out.println("Current Window State       : "
@@ -73,6 +85,13 @@ public abstract class BaseExtractor implements ProviderScrapInterface {
         });
     }
 
+    /**
+     * Add Provider plan
+     * Add to Individual provider plan List
+     * Add to Global Plan list for comparator
+     * @param mobilePlan
+     * @param providerPlan
+     */
     protected void addProviderPlan(MobilePlan mobilePlan, ProviderPlan providerPlan){
         if (this.getProviderPlanList().containsKey(mobilePlan))
         {
@@ -81,7 +100,7 @@ public abstract class BaseExtractor implements ProviderScrapInterface {
         }
         else
         {
-            ArrayList<ProviderPlan> planArrayList = new ArrayList<ProviderPlan>();
+            ArrayList<ProviderPlan> planArrayList = new ArrayList<>();
             planArrayList.add(providerPlan);
             this.getProviderPlanList().put(mobilePlan, planArrayList);
         }

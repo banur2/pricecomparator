@@ -29,6 +29,12 @@ public class VodafoneExtractor extends BaseExtractor {
         super(providerName);
     }
 
+    /**
+     * Need to click on two buttons - Accept all cookied, Get plan
+     * Lot of wait time needed
+     * @return HTMLSource
+     * @throws InterruptedException
+     */
     @Override
     public String setup() throws InterruptedException {
         String url = "https://www.vodafone.co.uk/mobile/phones/pay-monthly-contracts/apple/iphone-xr";
@@ -43,7 +49,7 @@ public class VodafoneExtractor extends BaseExtractor {
         webdriver.findElement(By.xpath("//button[contains(.,'Accept all cookies')]")).click();
         Thread.sleep(2000);
         webdriver.findElement(By.xpath("//button[contains(.,'Continue to plans')]")).click();
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         String source = webdriver.getPageSource();
         webdriver.close();
@@ -68,7 +74,7 @@ public class VodafoneExtractor extends BaseExtractor {
             return false;
 
         Provider provider = new Provider();
-        provider.setName("Vodafone");
+        provider.setName(super.getProviderName());
 
         for(Element e: masthead) {
             //System.out.println(e.html());
@@ -90,12 +96,14 @@ public class VodafoneExtractor extends BaseExtractor {
             plan.setMobileModel("iPhone XR 64 GB");
             String planStr = e.text();
             String[] planStrParsed = planStr.split(" ");
-            List<String> al = new ArrayList<String>();
-            al = Arrays.asList(planStrParsed);
+            List<String> al  = Arrays.asList(planStrParsed);
             System.out.println((al));
             ProviderPlan providerPlan = new ProviderPlan();
             providerPlan.setProvider(provider);
 
+            //Parse word by word
+            //Extract the information - need better implementation
+            //Unlimited to -1
             for(String s: al){
                 if (s.contains("Data"))
                 {
@@ -127,15 +135,10 @@ public class VodafoneExtractor extends BaseExtractor {
 
     public static void main(String[] arg) throws InterruptedException{
         WebDriverManager.chromedriver().setup();
-        int retry = 0;
+
         VodafoneExtractor extractor = new VodafoneExtractor("Vodafone UK");
         extractor.webdriver = new ChromeDriver();
-
-        if ((extractor.extract(extractor.setup() )== false) && retry > 2) {
-            retry++;
-            extractor.extract(extractor.setup());
-        }
-
+        extractor.extract(extractor.setup());
         System.out.println("Provider List " + extractor.getProviderPlanList());
 
 

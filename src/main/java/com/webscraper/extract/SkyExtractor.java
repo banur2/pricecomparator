@@ -28,6 +28,11 @@ public class SkyExtractor extends BaseExtractor {
         return super.setup();
     }
 
+    /**
+     * Extract the info
+     * @param htmlSource
+     * @return
+     */
     @Override
     public boolean extract(String htmlSource) {
 
@@ -43,7 +48,7 @@ public class SkyExtractor extends BaseExtractor {
             return false;
 
         Provider provider = new Provider();
-        provider.setName("Sky Mobile");
+        provider.setName(super.getProviderName());
 
         for(Element e: masthead) {
             //System.out.println(e.html());
@@ -57,15 +62,18 @@ public class SkyExtractor extends BaseExtractor {
             MobilePlan plan = new MobilePlan();
             plan.setMobileModel("iPhone XR 64 GB");
             String planStr = e.text();
+            //Split the data and parse
             String[] planStrParsed = planStr.split(" ");
-            List<String> al = new ArrayList<String>();
-            al = Arrays.asList(planStrParsed);
+
+            List<String> al = Arrays.asList(planStrParsed);
             System.out.println((al));
             ProviderPlan providerPlan = new ProviderPlan();
             providerPlan.setProvider(provider);
 
+            //Avoid the SIM Free plan
             if(al.get(0).equals("SIM"))
                 continue;
+            //Extract by position - might need to do better
             plan.setDataInGB(Integer.parseInt((al.get(0).replace("GB", "")).replace("Unlimited", "-1")));
             plan.setTextCount(Integer.parseInt(al.get(1).replace("Unlimited", "-1")));
             plan.setMinutes(Integer.parseInt(al.get(1).replace("Unlimited", "-1")));

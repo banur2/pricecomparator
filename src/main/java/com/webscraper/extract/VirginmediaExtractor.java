@@ -28,6 +28,11 @@ public class VirginmediaExtractor extends BaseExtractor {
         return super.setup();
     }
 
+    /**
+     * Extract the info
+     * @param htmlSource
+     * @return
+     */
     @Override
     public boolean extract(String htmlSource) {
 
@@ -44,7 +49,7 @@ public class VirginmediaExtractor extends BaseExtractor {
             return false;
 
         Provider provider = new Provider();
-        provider.setName("Virgin Media");
+        provider.setName(super.getProviderName());
         for(Element e: masthead) {
             //System.out.println(e.html());
 /*
@@ -66,12 +71,13 @@ public class VirginmediaExtractor extends BaseExtractor {
             plan.setMobileModel("iPhone XR 64 GB");
             String planStr = e.text();
             String[] planStrParsed = planStr.split(" ");
-            List<String> al = new ArrayList<String>();
-            al = Arrays.asList(planStrParsed);
+
+            List<String> al = Arrays.asList(planStrParsed);
             System.out.println((al));
             ProviderPlan providerPlan = new ProviderPlan();
             providerPlan.setProvider(provider);
 
+            //parsed by position
             plan.setDataInGB(Integer.parseInt((al.get(3).replace("gb", "")).replace("Unlimited", "-1")));
             plan.setTextCount(Integer.parseInt(al.get(2).replace("Unlimited", "-1")));
             plan.setMinutes(Integer.parseInt(al.get(1).replace("Unlimited", "-1")));
