@@ -110,7 +110,7 @@ public class PriceComparator {
                 else {
                     StringBuilder planList = new StringBuilder();
                     for (ProviderPlan val : queryResult) {
-                        planList.append(" £").append(val.getMonthlyPayment());
+                        planList.append(" £").append(String.format("%.02f", val.getMonthlyPayment()));
                     }
                     stringArrayList.add(planList.toString());
                 }
